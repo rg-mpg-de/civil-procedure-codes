@@ -7,7 +7,12 @@ in_file <- args[1]
 stem <- in_file %>%
   basename() %>%
   str_replace("\\.txt", "")
-out_file_stem <- str_c("procedure-code-sections/", stem)
+out_file_temp <- args[2]
+out_file_stem <- out_file_temp %>%
+#  basename() %>%
+  str_replace("-SPLIT", "") %>% 
+  str_replace("\\.txt", "") 
+# out_file_stem <- str_c("procedure-codes-sections/", stem)
 doc <- read_file(in_file)
 
 # Use pattern_clean on files we have cleaned up; otherwise use pattern_fuzzy. We

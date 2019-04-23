@@ -1,6 +1,9 @@
-OCR_OUTPUTS := $(patsubst pdf/%.pdf, procedure-codes/%.txt, $(wildcard pdf/*.pdf))
-CLEAN_CODES := $(patsubst procedure-codes/%.txt, cleaned-codes/%.txt, $(wildcard procedure-codes/*.txt))
-SPLIT_CODES := $(patsubst cleaned-codes/%.txt, procedure-code-sections/%-SPLIT.txt, $(wildcard cleaned-codes/*.txt))
+OCR_CODES   := $(patsubst pdf/%.pdf, procedure-codes-ocr/%.txt, $(wildcard pdf/*.pdf))
+CLEAN_CODES := $(patsubst procedure-codes-ocr/%.txt, procedure-codes-cleaned/%.txt, $(wildcard procedure-codes-ocr/*.txt))
+SPLIT_CODES := $(patsubst procedure-codes-cleaned/%.txt, procedure-codes-sections/%-SPLIT.txt, $(wildcard procedure-codes-cleaned/*.txt))
+
+CLEAN_CCODES := $(patsubst copyright-codes-ocr/%.txt, copyright-codes-cleaned/%.txt, $(wildcard copyright-codes-ocr/*.txt))
+SPLIT_CCODES := $(patsubst copyright-codes-cleaned/%.txt, copyright-codes-sections/%.txt, $(wildcard copyright-codes-cleaned/*.txt))
 
 all : cache/corpus-lsh.rda cache/network-graphs.rda article/Funk-Mullen.Spine-of-American-Law.pdf clusters
 
@@ -13,42 +16,80 @@ packrat :
 	Rscript -e "packrat::restore()"
 
 dirs :
-	mkdir -p cleaned-codes proc
-	mkdir -p procedure-code-sections
+	mkdir -p procedure-codes-cleaned proc
+	mkdir -p procedure-codes-sections
 	mkdir -p out
 	mkdir -p out/clusters
 	mkdir -p out/figures
 	mkdir -p out/matches
 	mkdir -p cache
 
-# Clean up the codes in `procedure-codes/`
+cdirs :
+	mkdir -p copyright-codes-cleaned proc
+	mkdir -p copyright-codes-sections
+
+
+# Clean up the codes in `procedure-codes-ocr/`
 .PHONY : codes
 codes : $(CLEAN_CODES)
 
-cleaned-codes/%.txt : procedure-codes/%.txt
+procedure-codes-cleaned/%.txt : procedure-codes-ocr/%.txt
 	Rscript --vanilla scripts/clean-text.R $^ $@
+
+# Clean up the codes in `copyright-codes-ocr/`
+.PHONY : ccodes
+ccodes : $(CLEAN_CCODES)
+
+copyright-codes-cleaned/%.txt : copyright-codes-ocr/%.txt
+	Rscript --vanilla scripts/clean-text.R $^ $@
+
 
 # Split the codes into sections
 .PHONY : splits
 splits : $(SPLIT_CODES)
 
-procedure-code-sections/%-SPLIT.txt : cleaned-codes/%.txt
-	Rscript --vanilla scripts/split-code.R $<
-	@touch $@
+procedure-codes-sections/%-SPLIT.txt : procedure-codes-cleaned/%.txt
+	Rscript --vanilla scripts/split-code.R $^ $@
+#	Rscript --vanilla scripts/split-code.R $<
+#	@touch $@
+
+# Split the codes into sections
+.PHONY : csplits
+csplits : $(SPLIT_CCODES)
+
+copyright-codes-sections/%.txt : copyright-codes-cleaned/%.txt
+	Rscript --vanilla scripts/split-code.R $^ $@
+
 
 # Find the similarities in the split codes
 .PHONY : lsh
-lsh : cache/corpus-lsh.rda
+lsh : cache/p-corpus-lsh.rda
 
-cache/corpus-lsh.rda : $(SPLIT_CODES)
-	Rscript --vanilla scripts/corpus-lsh.R
+cache/p-corpus-lsh.rda : $(SPLIT_CODES)
+	Rscript --vanilla scripts/corpus-lsh.R procedure-codes-sections cache/p-corpus-lsh.rda
+
+# Find the similarities in the split codes
+.PHONY : clsh
+clsh : cache/c-corpus-lsh.rda
+
+cache/c-corpus-lsh.rda : $(SPLIT_CCODES)
+	Rscript --vanilla scripts/corpus-lsh.R copyright-codes-sections cache/c-corpus-lsh.rda
+
 
 # Create the network graph data from the split codes
 .PHONY : network
-network : cache/network-graphs.rda
+network : cache/p-network-graphs.rda
 
-cache/network-graphs.rda : cache/corpus-lsh.rda
-	Rscript --vanilla scripts/network-graphs.R
+cache/p-network-graphs.rda : cache/p-corpus-lsh.rda
+	Rscript --vanilla scripts/network-graphs.R cache/p-corpus-lsh.rda cache/p-network-graphs.rda
+
+# Create the network graph data from the split copyright codes
+.PHONY : cnetwork
+cnetwork : cache/c-network-graphs.rda
+
+cache/c-network-graphs.rda : cache/c-corpus-lsh.rda
+	Rscript --vanilla scripts/network-graphs.R cache/c-corpus-lsh.rda cache/c-network-graphs.rda
+
 
 # Create the clusters
 .PHONY : clusters
@@ -81,8 +122,8 @@ clean :
 
 .PHONY : clean-splits
 clean-splits :
-	rm -f cleaned-codes/*
-	rm -rf procedure-code-sections
+	rm -f  procedure-codes-cleaned/*
+	rm -rf procedure-codes-sections
 
 .PHONY : clean-clusters
 clean-clusters :

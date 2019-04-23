@@ -3,9 +3,14 @@ suppressPackageStartupMessages(library(igraph))
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(ggraph))
 suppressPackageStartupMessages(library(stringr))
-load("cache/corpus-lsh.rda")
 source("R/helper.R")
 set.seed(82892)
+
+args <- commandArgs(trailingOnly = TRUE)
+infile <- args[1]
+outfile <- args[2]
+
+load(infile)
 
 # We will keep edges that have at least a certain number of shared connections
 # OR a percentage of borrowings that is greater than than a set percentage, but
@@ -88,4 +93,4 @@ state_nodes <- read.csv("scripts/regions.csv")
 states_g <- graph_from_data_frame(states_edges, directed = TRUE,
                                   vertices = state_nodes)
 
-save(codes_g, states_g, file = "cache/network-graphs.rda")
+save(codes_g, states_g, file = outfile)

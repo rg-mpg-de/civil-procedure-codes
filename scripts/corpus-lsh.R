@@ -6,11 +6,15 @@ source("R/helper.R")
 source("R/section-matches.R")
 options("mc.cores" = 8L)
 
+args <- commandArgs(trailingOnly = TRUE)
+indir <- args[1]
+outfile <- args[2]
+
 h <- 120
 b <- 60
 minhash <- minhash_generator(n = h, seed = 623)
 
-sections <- TextReuseCorpus(dir = "procedure-code-sections",
+sections <- TextReuseCorpus(dir = indir,
                             tokenizer = tokenize_ngrams, n = 5,
                             keep_tokens = FALSE,
                             minhash_func = minhash)
@@ -54,7 +58,7 @@ split_matches <- plyr::dlply(best_matches, "borrower_code", identity)
 summary_matches <- summarize_borrowings(best_matches)
 
 save(sections, buckets, scores, all_matches, best_matches, summary_matches,
-     file = "cache/corpus-lsh.rda")
+     file = outfile)
 
 dir.create("out", showWarnings = FALSE)
 dir.create("out/matches", showWarnings = FALSE)
