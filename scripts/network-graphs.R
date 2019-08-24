@@ -10,6 +10,7 @@ args <- commandArgs(trailingOnly = TRUE)
 infile <- args[1]
 outfile <- args[2]
 
+message("Loading LSH data")
 load(infile)
 
 # We will keep edges that have at least a certain number of shared connections

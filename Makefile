@@ -80,30 +80,46 @@ cache/c-corpus-lsh.rda : $(SPLIT_CCODES)
 .PHONY : network
 network : cache/p-network-graphs.rda
 
-cache/p-network-graphs.rda : cache/p-corpus-lsh.rda
+cache/p-network-graphs.rda :
 	Rscript --vanilla scripts/network-graphs.R cache/p-corpus-lsh.rda cache/p-network-graphs.rda
 
 # Create the network graph data from the split copyright codes
 .PHONY : cnetwork
 cnetwork : cache/c-network-graphs.rda
 
-cache/c-network-graphs.rda : cache/c-corpus-lsh.rda
-	Rscript --vanilla scripts/network-graphs.R cache/c-corpus-lsh.rda cache/c-network-graphs.rda
+cache/c-network-graphs.rda :
+	Rscript --vanilla scripts/network-graphs_c.R cache/c-corpus-lsh.rda cache/c-network-graphs.rda
 
 
 # Create the clusters
 .PHONY : clusters
 clusters : out/clusters/DONE.txt
 
-out/clusters/DONE.txt : cache/corpus-lsh.rda
-	Rscript --vanilla scripts/cluster-sections.R && \
+out/clusters/DONE.txt :
+	Rscript --vanilla scripts/cluster-sections.R cache/p-corpus-lsh.rda cache/p-clusters.rds && \
 	touch $@
+
+# Create the clusters
+.PHONY : cclusters
+cclusters : out/clusters/cDONE.txt
+
+out/clusters/cDONE.txt :
+	Rscript --vanilla scripts/cluster-sections.R cache/c-corpus-lsh.rda cache/c-clusters.rds && \
+	touch $@
+
 
 # Create the article
 .PHONY : article
 article : article/Funk-Mullen.Spine-of-American-Law.pdf
 
-article/Funk-Mullen.Spine-of-American-Law.pdf : article/Funk-Mullen.Spine-of-American-Law.Rmd cache/corpus-lsh.rda cache/network-graphs.rda
+article/Funk-Mullen.Spine-of-American-Law.pdf : article/Funk-Mullen.Spine-of-American-Law.Rmd
+	R --slave -e "set.seed(100); rmarkdown::render('$<', output_format = 'all')"
+
+# Create the article
+.PHONY : carticle
+carticle : carticle/CopyrightLaws.pdf
+
+carticle/CopyrightLaws.pdf : article/CopyrightLaws.Rmd
 	R --slave -e "set.seed(100); rmarkdown::render('$<', output_format = 'all')"
 
 # Update certain files in the research compendium for AHR

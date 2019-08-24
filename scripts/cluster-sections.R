@@ -5,8 +5,13 @@ suppressPackageStartupMessages(library("readr"))
 suppressPackageStartupMessages(library("textreuse"))
 suppressPackageStartupMessages(library("stringr"))
 source("R/helper.R")
+
+args <- commandArgs(trailingOnly = TRUE)
+infile <- args[1]
+outfile <- args[2]
+
 message("Loading LSH data")
-load("cache/corpus-lsh.rda")
+load(infile)
 
 scores_clustering <- scores %>%
   filter(score >= 0.1)
@@ -28,7 +33,7 @@ colnames(m) <- section_names
 rownames(m) <- section_names
 
 # Now use affinity propagation clustering to create clusters.
-cluster_cache <- "cache/clusters.rds"
+cluster_cache <- outfile
 if (!file.exists(cluster_cache)) {
   message("Clustering ... ... ... ... ...")
   timing <- system.time(

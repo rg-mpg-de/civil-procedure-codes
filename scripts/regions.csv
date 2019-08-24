@@ -1,38 +1,57 @@
 state,region
 AK,West
+AL,South
 AR,South
 AZ,West
+BI,British Colonies
 CA,West
 CO,West
-DC,South
-SD,West
+CT,New England
+DC,Mid-Atlantic
+DE,Mid-Atlantic
+DT,West
 FL,South
+FR,France
+GA,South
+GB,United Kingdom
+HI,Hawaii
 IA,Midwest
 ID,West
+IL,Midwest
 IN,Midwest
 KS,West
+KY,Midwest
+LA,South
+LC,Canada
+MA,New England
+MD,Mid-Atlantic
+ME,New England
 MN,Midwest
 MO,Midwest
+MS,South
 MT,West
 NC,South
 ND,West
 NE,West
+NH,New England
+NJ,Mid-Atlantic
 NM,West
 NV,West
+NY,New York
 OH,Midwest
 OK,West
 OR,West
+PA,Mid-Atlantic
+RI,New England
 SC,South
+SD,West
+TN,South
 TX,South
 UT,West
+VA,South
 WA,West
 WI,Midwest
 WV,South
 WY,West
-KY,Midwest
-NY,New York
-IL,Midwest
-MA,New England
-VA,South
-GA,South
-ME,New England
+UK,United Kingdom
+US,Federal
