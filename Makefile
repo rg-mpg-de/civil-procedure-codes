@@ -1,6 +1,6 @@
-OCR_OUTPUTS := $(patsubst pdf/%.pdf, procedure-codes/%.txt, $(wildcard pdf/*.pdf))
-CLEAN_CODES := $(patsubst procedure-codes/%.txt, cleaned-codes/%.txt, $(wildcard procedure-codes/*.txt))
-SPLIT_CODES := $(patsubst cleaned-codes/%.txt, procedure-code-sections/%-SPLIT.txt, $(wildcard cleaned-codes/*.txt))
+OCR_OUTPUTS := $(patsubst pdf/%.pdf, constitutions/%.txt, $(wildcard pdf/*.pdf))
+CLEAN_CODES := $(patsubst constitutions/%.txt, cleaned-codes/%.txt, $(wildcard constitutions/*.txt))
+SPLIT_CODES := $(patsubst cleaned-codes/%.txt, constitution-sections/%-SPLIT.txt, $(wildcard cleaned-codes/*.txt))
 
 all : cache/corpus-lsh.rda cache/network-graphs.rda article/Funk-Mullen.Spine-of-American-Law.pdf clusters
 
@@ -12,27 +12,27 @@ setup : | packrat dirs
 packrat :
 	Rscript -e "packrat::restore()"
 
-dirs :
+dirs :constitutions
 	mkdir -p cleaned-codes proc
-	mkdir -p procedure-code-sections
+	mkdir -p constitution-sections
 	mkdir -p out
 	mkdir -p out/clusters
 	mkdir -p out/figures
 	mkdir -p out/matches
 	mkdir -p cache
 
-# Clean up the codes in `procedure-codes/`
+# Clean up the codes in `constitutions/`
 .PHONY : codes
 codes : $(CLEAN_CODES)
 
-cleaned-codes/%.txt : procedure-codes/%.txt
+cleaned-codes/%.txt : constitutions/%.txt
 	Rscript --vanilla scripts/clean-text.R $^ $@
 
 # Split the codes into sections
 .PHONY : splits
 splits : $(SPLIT_CODES)
 
-procedure-code-sections/%-SPLIT.txt : cleaned-codes/%.txt
+constitution-sections/%-SPLIT.txt : cleaned-codes/%.txt
 	Rscript --vanilla scripts/split-code.R $<
 	@touch $@
 
@@ -70,8 +70,8 @@ article/Funk-Mullen.Spine-of-American-Law.pdf : article/Funk-Mullen.Spine-of-Ame
 compendium :
 	zip -j compendium/all-section-matches.csv.zip out/matches/all_matches.csv
 	zip -j compendium/best-section-matches.csv.zip out/matches/best_matches.csv
-	zip -r compendium/procedure-codes.zip procedure-codes/
-	zip -r compendium/procedure-code-sections.zip procedure-code-sections/
+	zip -r compendium/constitutions.zip constitutions/
+	zip -r compendium/constitution-sections.zip constitution-sections/
 	zip -j -r compendium/clusters-of-sections.zip out/clusters/
 	git archive --format=zip --output=compendium/field-code-analysis.zip master
 
@@ -82,7 +82,7 @@ clean :
 .PHONY : clean-splits
 clean-splits :
 	rm -f cleaned-codes/*
-	rm -rf procedure-code-sections
+	rm -rf constitution-sections
 
 .PHONY : clean-clusters
 clean-clusters :
@@ -93,8 +93,8 @@ clean-clusters :
 clean-compendium : 
 	rm -f compendium/all-section-matches.csv.zip
 	rm -f compendium/best-section-matches.csv.zip
-	rm -f compendium/procedure-codes.zip
-	rm -f compendium/procedure-code-sections.zip
+	rm -f compendium/constitutions.zip
+	rm -f compendium/constitution-sections.zip
 	rm -f compendium/clusters-of-sections.zip
 	rm -f compendium/field-code-analysis.zip
 
